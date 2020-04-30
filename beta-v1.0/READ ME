@@ -1,0 +1,15 @@
+READ ME
+
+This is beta v1.0 of this application
+This is purely a model for how the complete application will work
+
+Some of the key features that the alpha v1.0 will have that this won't include
+but are not limited to:
+ - Personalized stretches depending on needs done with advanced algorithm
+ - 30 second notification before exercise (with "Start Now" button)
+ - far more stretches and exersizes in the database
+ - advanced stretch/exercise distribution algorithm with custom timings
+ - updater tool
+ - visually pleasing interface
+ - logins to save user data for all devices
+ - website and apis for downloads and updates
