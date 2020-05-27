@@ -1,2 +1,0 @@
-abed.a.h@live.com
-password
