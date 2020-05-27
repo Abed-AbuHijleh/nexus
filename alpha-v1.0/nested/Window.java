@@ -46,8 +46,8 @@ public class Window extends JFrame {
         // Setup window
         super("Window");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setBounds(0,0, 250, 200);
-        this.setTitle("Ergonomic");
+        this.setBounds(0,0, (int) screenSize.getWidth(), (int) screenSize.getHeight());
+        this.setTitle("Break Time");
         this.setResizable(false);
         this.setAlwaysOnTop(true);
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -58,8 +58,7 @@ public class Window extends JFrame {
         String[] excersizes = appFileReader("./db/appdb.txt");
 
         // Create frame
-        createPanels();
-        this.add(mainPanel);
+        createPanels(this);
         color(Integer.parseInt(colorSet[0], 10));
 
         // Display the excersizes and form window
@@ -87,15 +86,16 @@ public class Window extends JFrame {
         new Window();
     }
 
-    private void createPanels() {
+    private void createPanels(JFrame jF) {
         mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        mainPanel.setBorder(new EmptyBorder((int) Math.floor(screenSize.getHeight()/20), (int) Math.floor(screenSize.getWidth()/25), (int) Math.floor(screenSize.getHeight()/20), (int) Math.floor(screenSize.getWidth()/25)));
         northPanel = new JPanel(new BorderLayout());
-        midPanel = new JPanel(new GridLayout(2,1));
-        midPanel.setBorder(new EmptyBorder(0,(int) Math.floor(screenSize.getWidth()/3),0,0));
+        midPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
         midSouthPanel = new JPanel(new BorderLayout());  
+        midSouthPanel.setBorder(new EmptyBorder(0, (int) Math.floor(screenSize.getWidth()/4), 0, 0));
         imagePanel = new JPanel(new BorderLayout());     
-        imagePanel.setSize(100,100);   
+        midPanel.setBorder(new EmptyBorder(0, (int) (Math.floor(screenSize.getWidth()/5)), 0, 0));
 
         timerLabel = new JLabel("<html><h2>xx:xx</h2></html>");
         titleLabel = new JLabel("<html><h1>Excersize</h1></html>");
@@ -106,11 +106,22 @@ public class Window extends JFrame {
         mainPanel.add(northPanel, BorderLayout.NORTH);
         mainPanel.add(midPanel, BorderLayout.CENTER);
 
-        midPanel.add(imagePanel);
-        midPanel.add(midSouthPanel);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.gridheight = 2;
+        c.gridx = 0;
+        c.gridy = 0;
+        midPanel.add(imagePanel, c);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.gridx = 3;
+        c.gridy = 2;
+        midPanel.add(midSouthPanel, c);
         midSouthPanel.add(descLabel, BorderLayout.EAST);
         northPanel.add(titleLabel, BorderLayout.WEST);
         northPanel.add(timerLabel, BorderLayout.EAST);
+
+        jF.add(mainPanel);
     }
 
     private void color(Integer type) {
