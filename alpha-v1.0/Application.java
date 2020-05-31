@@ -1,6 +1,12 @@
 
 // Imports
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.plaf.DimensionUIResource;
 
 import nested.Algo;
 import nested.swapFix;
@@ -8,6 +14,12 @@ import nested.swapFix;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import java.util.concurrent.TimeUnit;
 
 import nested.Window;
@@ -26,16 +38,20 @@ public class Application extends JFrame implements ActionListener, ItemListener 
          int setCount;
          int setsDone;
         // Key Panels
-    JPanel motherPanel, login, survey, settings, action, directory;
-    JButton loginLoginButton, directoryStart, directorySurvey, directorySettings, settingsLogout, settingsCancel, settingsApply, settingsRestore, settingsBack, actionStop, actionPause;
+    JPanel motherPanel, login, survey, settings, action, directory, loginWestPanel, loginEastPanel, loginUsernamePanel, loginPasswordPanel, loginErrorPanel,
+    loggedInPanel, logoutPanel, loggedInEastPanel, directoryLogoPanel, actionHeader, actionContent, actionHeaderEast, actionContentPassive, actionContentActive;
+    JButton loginLoginButton, directoryStart, directorySurvey, directorySettings, directoryLogout, settingsCancel, settingsApply, settingsRestore, actionStop, actionPause, actionStart;
     JTextField loginUsername, loginPassword;
     JCheckBox loginRemember, settingsWarning, settingsDarkMode;
     JComboBox<String> settingsWorkTime, settingsRunTime, settingsBreakLength;
-    JLabel actionTimer;
+    JLabel actionTimer, loginLogoLabel, loginSignupLabel, loginErrorDisplay, loginPasswordForget, directoryLogo, directoryLogoutImage, actionMessage;
+
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
     Color black = Color.BLACK;
     Color white = Color.WHITE;
-    Color gray = new java.awt.Color(128, 128, 128);
+    Color lightGray = new java.awt.Color(241, 239, 240);
+    Color gray = new java.awt.Color(221, 219, 220);
     Color blue = new java.awt.Color(102, 255, 255);
     Color salmon = new java.awt.Color(255, 102, 102);
     Color orange = new java.awt.Color(255, 128, 0);
@@ -47,7 +63,12 @@ public class Application extends JFrame implements ActionListener, ItemListener 
         super("Application");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setBounds(200,200, keyPanelSizeWidth, keyPanelSizeHeight);
-        this.setTitle("Ergonomic");
+        this.setTitle("Screen Buddy");
+        try {
+            Image img = ImageIO.read(new File("./assets/icon.png"));
+            this.setIconImage(img);
+        } catch (IOException err) {}
+
         this.setResizable(false);
 
         // Call startup functrions
@@ -57,23 +78,20 @@ public class Application extends JFrame implements ActionListener, ItemListener 
         // Add Listeners
         loginLoginButton.addActionListener(this);
         loginRemember.addItemListener(this);
-        settingsLogout.addActionListener(this);
+        directoryLogout.addActionListener(this);
         directorySettings.addActionListener(this);
         directoryStart.addActionListener(this);
         directorySurvey.addActionListener(this);
         settingsApply.addActionListener(this);
         settingsCancel.addActionListener(this);
         settingsRestore.addActionListener(this);
-        settingsBack.addActionListener(this);
         actionPause.addActionListener(this);
         actionStop.addActionListener(this);
+        actionStart.addActionListener(this);
 
         // Add Panels
         motherPanel.add(login);
-        motherPanel.add(survey);
-        motherPanel.add(settings);
-        motherPanel.add(action);
-        motherPanel.add(directory);
+        motherPanel.add(loggedInPanel);
         this.add(motherPanel);
 
         // Set visible
@@ -147,20 +165,52 @@ public class Application extends JFrame implements ActionListener, ItemListener 
         // Setup app coloring (light or dark)
 
         private void appColourer(int type) {
-            Color sysCol;
             if (type == 0) {
                 // Light mode
-                sysCol = white;
+                motherPanel.setBackground(white);
+                loggedInPanel.setBackground(white);
+                loggedInEastPanel.setBackground(white);
+
+                action.setBackground(white);
+                actionTimer.setBackground(white);
+                actionTimer.setForeground(black);
+                actionHeader.setBackground(white);
+                actionHeaderEast.setBackground(white);
+                actionContent.setBackground(white);
+                actionStart.setBackground(lightGray);
+                actionPause.setBackground(lightGray);
+                actionStop.setBackground(lightGray);
+                actionContentPassive.setBackground(white);
+
+                settings.setBackground(white);
+
+                directory.setBackground(gray);
+                directoryLogoPanel.setBackground(gray);
+                logoutPanel.setBackground(gray);
+                directoryStart.setBackground(white);
+                directorySurvey.setBackground(gray);
+                directorySettings.setBackground(gray);
+                directoryLogout.setBackground(gray);
+
+                login.setBackground(white);
+                loginRemember.setBackground(white);
+                loginWestPanel.setBackground(white);
+                loginLogoLabel.setBackground(white);
+                loginEastPanel.setBackground(white);
+                loginUsernamePanel.setBackground(white);
+                loginPasswordPanel.setBackground(white);
+                loginErrorPanel.setBackground(white);
             } else if (type == 1){
                 // Dark mode
-                sysCol = gray;
-            } else {
-                sysCol = white;
+                motherPanel.setBackground(black);
+
+                settings.setBackground(black);
+
+                directory.setBackground(black);
+
+                login.setBackground(black);
+                loginRemember.setBackground(black);
             }
-            motherPanel.setBackground(sysCol);
-            login.setBackground(sysCol);
-            settings.setBackground(sysCol);
-            directory.setBackground(sysCol);
         }
 
 
@@ -177,52 +227,248 @@ public class Application extends JFrame implements ActionListener, ItemListener 
 
         //
         // Login
-        login = new JPanel();
+        loginWestPanel = new JPanel(new GridBagLayout());
+        loginEastPanel = new JPanel(new GridBagLayout());
+        loginLogoLabel = new JLabel();
+        try {
+            Image img = ImageIO.read(new File("./assets/Logo.png"));
+            img = img.getScaledInstance( 350, 140,  java.awt.Image.SCALE_SMOOTH ) ;  
+            loginLogoLabel.setIcon(new ImageIcon(img));
+        } catch (IOException err) {}
+        loginSignupLabel = new JLabel("<html><h3>Don't have an account? <a style='color: #50E6E6;' href='google.com'>Sign Up Here</a></h3></html>");
+
+        login = new JPanel(new GridLayout(0,2));
         login.setBounds(0, 0, keyPanelSizeWidth, keyPanelSizeHeight);
         login.setVisible(false);
 
-        loginLoginButton = new JButton("Login");
-        loginRemember = new JCheckBox("Remember Me");
-        loginUsername = new JTextField("username");
-        loginPassword = new JTextField("password");
+        loginLoginButton = new JButton();
+        loginLoginButton.setFocusPainted(false);
+        try {
+            Image img = ImageIO.read(new File("./assets/Login.png"));
+            img = img.getScaledInstance( 81, 81,  java.awt.Image.SCALE_SMOOTH ) ;  
+            loginLoginButton.setIcon(new ImageIcon(img));
+            loginLoginButton.setOpaque(false);
+            loginLoginButton.setContentAreaFilled(false);
+            loginLoginButton.setBorderPainted(false);
+        } catch (IOException err) {}
+        loginRemember = new JCheckBox("<html><h4>Remember Me</h4><html>");
+        loginRemember.setFocusPainted(false);
+        loginRemember.setHorizontalTextPosition(SwingConstants.LEFT);
+        try {
+            Image img = ImageIO.read(new File("./assets/switchOff.png"));
+            img = img.getScaledInstance( 40, 40,  java.awt.Image.SCALE_SMOOTH ) ;  
+            loginRemember.setIcon(new ImageIcon(img));
 
-        login.add(loginLoginButton);
-        login.add(loginRemember);
-        login.add(loginUsername);
-        login.add(loginPassword);
+            img = ImageIO.read(new File("./assets/switchOn.png"));
+            img = img.getScaledInstance( 40, 40,  java.awt.Image.SCALE_SMOOTH ) ; 
+            loginRemember.setSelectedIcon(new ImageIcon(img));
+        } catch (IOException err) {}
+        loginUsername = new JTextField("");
+        loginUsername.setPreferredSize(new Dimension((int) keyPanelSizeWidth / 5, 15));
+        loginPassword = new JTextField("");
+        loginPassword.setPreferredSize(new Dimension((int) keyPanelSizeWidth / 5, 15));
+
+        GridBagConstraints c = new GridBagConstraints();
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.ipady = 40;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 2;
+        c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy = 0;
+        loginWestPanel.add(loginLogoLabel, c);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 0;
+        c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy = 4;
+        loginWestPanel.add(loginSignupLabel, c);
+
+        loginWestPanel.setBorder(new EmptyBorder(keyPanelSizeHeight/20, 20, keyPanelSizeHeight/4, 20));
+
+        loginPasswordForget = new JLabel("<html><h3><a  style='color: #50e6e6; text-decoration: none;' href='youtube.com'>Forgot Password?</a></h3></html>");
+        loginErrorDisplay = new JLabel("<html><p><strong><span style='color: #ff6666;'>Invalid login credentials</span></strong></p></html>");
+        loginErrorDisplay.setVisible(false);
+
+        loginErrorPanel = new JPanel(new BorderLayout());
+
+        loginUsernamePanel = new JPanel();
+        loginUsernamePanel.setBorder(new TitledBorder(new LineBorder(black), "Email"));
+        loginUsernamePanel.add(loginUsername);
+        loginUsername.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+
+        loginPasswordPanel = new JPanel();
+        loginPasswordPanel.add(loginPassword);
+        loginPasswordPanel.setBorder(new TitledBorder(new LineBorder(black), "Password"));
+        loginPassword.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+
+        c = new GridBagConstraints();
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+        loginEastPanel.add(loginUsernamePanel);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.gridx = 1;
+        c.gridy = 2;
+        loginEastPanel.add(loginRemember, c);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 2;
+        loginEastPanel.add(loginPasswordPanel, c);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 1;
+        c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy = 3;
+        loginEastPanel.add(loginPasswordForget, c);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 1;
+        c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy = 4;
+        loginErrorPanel.add(loginLoginButton, BorderLayout.EAST);
+        loginErrorPanel.add(loginErrorDisplay, BorderLayout.WEST);
+        loginErrorPanel.setBorder(new EmptyBorder(40, 0, 0, 0));
+        loginEastPanel.add(loginErrorPanel, c);
+        loginEastPanel.setBorder(new EmptyBorder(130, 0, 0, 0));
+
+        login.add(loginWestPanel);
+        login.add(loginEastPanel);
 
         //
         // Directory
-        directory = new JPanel();
-        directory.setVisible(false);
 
-        directorySettings = new JButton("Settings");
-        directoryStart = new JButton("Begin");
-        directorySurvey = new JButton("Survey");
+        loggedInPanel = new JPanel(new BorderLayout());
+        loggedInPanel.setVisible(true);
+        loggedInEastPanel = new JPanel();
+        loggedInPanel.add(loggedInEastPanel, BorderLayout.EAST);
+        loggedInEastPanel.setPreferredSize(new Dimension(keyPanelSizeWidth-110, keyPanelSizeHeight));
 
-        directory.add(directoryStart);
-        directory.add(directorySurvey);
-        directory.add(directorySettings);
+        directory = new JPanel(new GridBagLayout());
+        directoryLogoPanel = new JPanel();
+        directoryLogoPanel.setBorder(new EmptyBorder(5,10,10,0));
+
+        directoryLogo = new JLabel();
+        try {
+            Image img = ImageIO.read(new File("./assets/Logo.png"));
+            img = img.getScaledInstance( 85, 35,  java.awt.Image.SCALE_SMOOTH ) ;  
+            directoryLogo.setIcon(new ImageIcon(img));
+        } catch (IOException err) {}
+        directoryLogoutImage = new JLabel();
+        try {
+            Image img = ImageIO.read(new File("./assets/logout.png"));
+            img = img.getScaledInstance( 15, 15,  java.awt.Image.SCALE_SMOOTH ) ;  
+            directoryLogoutImage.setIcon(new ImageIcon(img));
+        } catch (IOException err) {}
+
+        directoryStart = new JButton("<html><h3>Begin</h3></html>");
+        directoryStart.setFocusPainted(false);
+        directoryStart.setBorder(null);
+        directoryStart.setPreferredSize(new Dimension(110, 40));
+
+        directorySurvey = new JButton("<html><h3>Data</h3></html>");
+        directorySurvey.setFocusPainted(false);
+        directorySurvey.setPreferredSize(new Dimension(110, 40));
+        directorySurvey.setBorder(null);
+
+        directorySettings = new JButton("<html><h3>Settings</h3></html>");
+        directorySettings.setFocusPainted(false);
+        directorySettings.setPreferredSize(new Dimension(110, 40));
+        directorySettings.setBorder(null);
+
+        directoryLogout = new JButton("Logout");
+        directoryLogout.setFocusPainted(false);
+        directoryLogout.setBorder(null);
+
+
+        c = new GridBagConstraints();
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+        directoryLogoPanel.add(directoryLogo);
+        directory.add(directoryLogoPanel, c);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 1;
+        directory.add(directoryStart, c);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 2;
+        directory.add(directorySurvey, c);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 3;
+        directory.add(directorySettings, c);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 100;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 4;
+        logoutPanel = new JPanel();
+        logoutPanel.add(directoryLogout);
+        logoutPanel.add(directoryLogoutImage);
+        logoutPanel.setBorder(new EmptyBorder(180, 0, 20, 0));
+        directory.add(logoutPanel, c);
+
+        loggedInPanel.add(directory, BorderLayout.WEST);
 
         //
         // Survey
         survey = new JPanel(); 
-        survey.setBounds(0, 0, keyPanelSizeWidth, keyPanelSizeHeight);
         survey.setVisible(false);
+
+        loggedInEastPanel.add(survey);
 
         //
         // Settings
         settings = new JPanel();
-        settings.setBounds(0, 0, keyPanelSizeWidth, keyPanelSizeHeight);
         settings.setVisible(false);
 
-        settingsLogout = new JButton("Logout");
         settingsApply = new JButton("Apply");
         settingsCancel = new JButton("Cancel");
         settingsRestore = new JButton("Restore Defaults");
-        settingsBack = new JButton("Back");
-        settingsDarkMode = new JCheckBox();
-        settingsWarning = new JCheckBox();
+        settingsDarkMode = new JCheckBox("Darkmode");
+        settingsWarning = new JCheckBox("30 Second Headsup");
         String[] WorkTime = {"30 Minutes", "45 Minutes", "1 Hour (Recommended)", "75 Minutes", "90 Minutes"};
         settingsWorkTime = new JComboBox<String>(WorkTime);
         String[] RunTime = {"4.5 Hours", "6 Hours", "9 Hours", "Constant"};
@@ -233,16 +479,101 @@ public class Application extends JFrame implements ActionListener, ItemListener 
         settings.add(settingsApply);
         settings.add(settingsCancel);
         settings.add(settingsRestore);
-        settings.add(settingsBack);
         settings.add(settingsDarkMode);
         settings.add(settingsWarning);
         settings.add(settingsWorkTime);
         settings.add(settingsRunTime);
         settings.add(settingsBreakLength);
-        settings.add(settingsLogout);
 
+        loggedInEastPanel.add(settings);
+
+        //
+        // Begin Tab
+        action = new JPanel(new GridBagLayout());
+        action.setVisible(true);
+        actionHeader = new JPanel(new BorderLayout());
+        actionHeader.setBorder(new CompoundBorder(new EmptyBorder(10,0,5,5), new MatteBorder(0, 0, 5, 0, lightGray)));
+        actionHeaderEast = new JPanel(new BorderLayout());
+        actionHeaderEast.setBorder(new EmptyBorder(0, keyPanelSizeWidth-400, 0, 0));
+        actionContent = new JPanel();
+        actionContent.setPreferredSize(new Dimension(keyPanelSizeWidth-110, keyPanelSizeHeight-35));
+
+        actionTimer = new JLabel("xx:xx");
+
+        actionPause = new JButton("Pause");
+        actionPause.setEnabled(false);
+        actionPause.setPreferredSize(new Dimension(80, 25));
+        actionPause.setFocusPainted(false);
+        actionPause.setBorder(null);
+
+        actionStop = new JButton("Stop");
+        actionStop.setEnabled(false);
+        actionStop.setPreferredSize(new Dimension(80, 25));
+        actionStop.setFocusPainted(false);
+        actionStop.setBorder(null);
+
+        actionStart = new JButton("Start");
+        actionStart.setPreferredSize(new Dimension(100, 25));
+        actionStart.setFocusPainted(false);
+        actionStart.setBorder(null);
+
+        actionHeader.add(actionStart, BorderLayout.WEST);
+        actionHeaderEast.add(actionPause, BorderLayout.WEST);
+        actionHeaderEast.add(actionStop, BorderLayout.EAST);
+        actionHeader.add(actionHeaderEast, BorderLayout.EAST);
+
+        c = new GridBagConstraints();
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+        action.add(actionHeader, c);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 1;
+        action.add(actionContent, c);
+
+
+        actionMessage = new JLabel();
+        try {
+            String[] test = appFileReader("./db/distrubution.txt");
+            test[5] = test[5];
+            actionMessage.setText("<html><h1 style='color:gray'>Press Start to Begin</h1></html>");
+            actionStart.setEnabled(true);
+        } catch (ArrayIndexOutOfBoundsException err) {
+            // No data yet
+            actionMessage.setText("<html><h2 style='color:gray'>Please fill in some info in the data tab before beginning</h2></html>");
+            actionStart.setEnabled(false);
+        }
+
+        actionContentPassive = new JPanel(new BorderLayout());
+        actionContentPassive.setBorder(new EmptyBorder(80, 0, 0, 0));
+        actionContentPassive.add(actionMessage, BorderLayout.CENTER);
+
+        loggedInEastPanel.add(action);
+
+
+        actionContentActive = new JPanel(new GridBagLayout());
+
+        actionContentActive.add(actionTimer);
+        actionContentActive.setVisible(false);
+
+        actionContent.add(actionContentActive);
+        actionContent.add(actionContentPassive);
+
+
+
+
+        // Settings Pt 2
         // Read file and setup the choices accordingly
-
         try {
             settingPreferences = appFileReader("db/preferences.txt");
             // Setup system darkmode or lightmode
@@ -252,7 +583,7 @@ public class Application extends JFrame implements ActionListener, ItemListener 
             } else if (settingPreferences[0].equals("1")) {
                 appColourer(1);
             }
-        } catch(ArrayIndexOutOfBoundsException err) {
+        } catch (ArrayIndexOutOfBoundsException err) {
            // Default Settings 
            appColourer(0);
            settingPreferences = new String[5];
@@ -262,6 +593,15 @@ public class Application extends JFrame implements ActionListener, ItemListener 
            settingPreferences[3] = "6";
            settingPreferences[4] = "c";
            appFileWriter("db/preferences.txt", settingPreferences);
+        } catch (NullPointerException err) {
+            appColourer(0);
+            settingPreferences = new String[5];
+            settingPreferences[0] = "0";
+            settingPreferences[1] = "1";
+            settingPreferences[2] = "60";
+            settingPreferences[3] = "6";
+            settingPreferences[4] = "c";
+            appFileWriter("db/preferences.txt", settingPreferences); 
         }
 
         // Set all swing components into the proper position
@@ -307,22 +647,6 @@ public class Application extends JFrame implements ActionListener, ItemListener 
         } else {
             settingsBreakLength.setSelectedIndex(2);
         }
-
-
-        //
-        // Begin Tab
-        action = new JPanel();
-        action.setBounds(0, 0, keyPanelSizeWidth, keyPanelSizeHeight);
-        action.setVisible(false);
-
-        actionTimer = new JLabel("xx:xx");
-        actionPause = new JButton("Pause");
-        actionStop = new JButton("Stop");
-
-        action.add(actionTimer);
-        action.add(actionPause);
-        action.add(actionStop);
-
     }
 
         // Check bootup succeeded and call from there
@@ -334,12 +658,16 @@ public class Application extends JFrame implements ActionListener, ItemListener 
                 // Login Authorized
                 login.setVisible(false);
                 directory.setVisible(true);
+                loginErrorDisplay.setVisible(false);
             } else {
                 // Login Unauthorized
                 login.setVisible(true);
+                loginErrorDisplay.setVisible(true);
             }
         } catch (ArrayIndexOutOfBoundsException err) {
             //Save file unpopulate
+            login.setVisible(true);
+        } catch (NullPointerException err) {
             login.setVisible(true);
         }
     }
@@ -363,8 +691,6 @@ public class Application extends JFrame implements ActionListener, ItemListener 
         } catch (InterruptedException err) {}
         // Stop Function
         if (runType == 1) {
-            directory.setVisible(true);
-            action.setVisible(false);
             return;
         }
         // Pause Function
@@ -419,34 +745,6 @@ public class Application extends JFrame implements ActionListener, ItemListener 
 
         // Insure that the distrubution has been populated
         String[] values = appFileReader("db/distrubution.txt");
-        try {
-            values[4] = values[4];
-        } catch (ArrayIndexOutOfBoundsException err) {
-            // Leave tab
-            action.setVisible(false);
-            directory.setVisible(true);
-            // Pop up to insure that the user goes to survey
-            SwingWorker optionWindow= new SwingWorker<String, Void>() {
-                @Override
-                protected String doInBackground() throws Exception {
-                    int result = JOptionPane.showConfirmDialog(null, "We need some info on you, you must complete the survey.\n Go there now?", "Alert", JOptionPane.YES_NO_OPTION);
-                    switch (result) {
-                       case JOptionPane.YES_OPTION:
-                       directory.setVisible(false);
-                       survey.setVisible(true);
-                       break;
-                       case JOptionPane.NO_OPTION:
-                       break;
-                       case JOptionPane.CLOSED_OPTION:
-                       break;
-                    }
-                    return null;
-                }
-            };
-            optionWindow.execute();
-            return;
-        }
-
 
         // Test for constnat repition
         if (settingPreferences[3].equals("c")) {
@@ -495,34 +793,46 @@ public class Application extends JFrame implements ActionListener, ItemListener 
             checkCredentials();
             if (loginRem == 1) {} 
             else {
-                userInformation[0] = "";
-                userInformation[1] = "";
-                appFileWriter("db/userSave.txt", userInformation);
+                String[] blank = {""};
+                appFileWriter("db/userSave.txt", blank);
             }
-        } else if (e.getSource() == settingsLogout) {
+            settingPreferences = new String[5];
+            settingPreferences[0] = "0";
+            settingPreferences[1] = "1";
+            settingPreferences[2] = "60";
+            settingPreferences[3] = "6";
+            settingPreferences[4] = "c";
+            appFileWriter("db/preferences.txt", settingPreferences); 
+        } else if (e.getSource() == directoryLogout) {
             // Clear save file
-            String[] userInformation = new String[2];
-            userInformation[0] = "";
-            userInformation[1] = "";
-            appFileWriter("db/userSave.txt", userInformation);
+            String[] blank = {""};
+            appFileWriter("db/userSave.txt", blank);
+            appFileWriter("db/preferences.txt", blank);
+            loginUsername.setText("");
+            loginPassword.setText("");
             settings.setVisible(false);
             login.setVisible(true);
         } else if (e.getSource() == directoryStart) {
-            directory.setVisible(false);
+            survey.setVisible(false);
+            directorySurvey.setBackground(gray);
+            settings.setVisible(false);
+            directorySettings.setBackground(gray);
             action.setVisible(true);
-            SwingWorker extraThread= new SwingWorker<String, Void>() {
-                @Override
-                protected String doInBackground() throws Exception {
-                    startRun();
-                    return null;
-                }
-            };
-            extraThread.execute();
+            directoryStart.setBackground(white);
         } else if (e.getSource() == directorySettings) {
-            directory.setVisible(false);
+            survey.setVisible(false);
+            directorySurvey.setBackground(gray);
+            action.setVisible(false);
+            directoryStart.setBackground(gray);
             settings.setVisible(true);
+            directorySettings.setBackground(white);
         } else if (e.getSource() == directorySurvey) {
-            directory.setVisible(false);
+            action.setVisible(false);
+            directoryStart.setBackground(gray);
+            settings.setVisible(false);
+            directorySettings.setBackground(gray);
+            survey.setVisible(true);
+            directorySurvey.setBackground(white);
         } else if (e.getSource() == settingsApply) {
             String[] settingPreferences = new String[5];
             if (settingsDarkMode.isSelected() == false) {
@@ -637,9 +947,6 @@ public class Application extends JFrame implements ActionListener, ItemListener 
                 }
             };
             optionWindow.execute();
-        } else if (e.getSource() == settingsBack) {
-            settings.setVisible(false);
-            directory.setVisible(true);
         } else if (e.getSource() == actionPause) {
             // Unpausing
             if (runType == 2) {
@@ -662,11 +969,33 @@ public class Application extends JFrame implements ActionListener, ItemListener 
 
         } else if (e.getSource() == actionStop) {
             secondsRemaining = 0;
+            runType = 1;
             // Clear appdb.txt
             String[] clear = {""};
             appFileWriter("db/appdb.txt", clear);
-            action.setVisible(false);
-            directory.setVisible(true);
+            //
+            actionContentActive.setVisible(false);
+            actionContentPassive.setVisible(true);
+            actionStart.setEnabled(true);
+            actionStop.setEnabled(false);
+            actionPause.setEnabled(false);
+
+            // Reset panel
+        } else if (e.getSource() == actionStart) {
+            actionContentActive.setVisible(true);
+            actionContentPassive.setVisible(false);
+            actionStart.setEnabled(false);
+            actionStop.setEnabled(true);
+            actionPause.setEnabled(true);
+            runType = 0;
+            SwingWorker extraThread= new SwingWorker<String, Void>() {
+                @Override
+                protected String doInBackground() throws Exception {
+                    startRun();
+                    return null;
+                }
+            };
+            extraThread.execute();
         }
     }
 

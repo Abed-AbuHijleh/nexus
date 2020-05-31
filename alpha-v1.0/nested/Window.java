@@ -3,6 +3,7 @@ package nested;
 // Imports
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.DimensionUIResource;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -30,16 +31,16 @@ public class Window extends JFrame {
     // imageDir, name, time, sides (0 for no 1 for yea)
     int seconds = 0;
     String[][] excersizeData = {
-        {"sample.png", "Wrist Flexion", "15", "1"}, 
-        {"sample.png", "Wrist Extension", "15", "1"}, 
-        {"sample.png", "Neck Flexion", "30", "0"}, 
-        {"sample.png", "Neck Extension", "30", "0"}, 
-        {"sample.png", "Neck Roll", "45", "0"},
-        {"sample.png", "Shoulder Shrugs", "30", "0"},
-        {"sample.png", "Hamstring Stretch", "20", "1"},
-        {"sample.png", "Calf Raises", "30", "0"},
-        {"sample.png", "Back Lateral Extension", "15", "0"},
-        {"sample.png", "Go For a Walk", "90", "0"}
+        {"sample.png", "Wrist Flexion", "15", "1", "First stretch the right side", "Now stretch the left"}, 
+        {"sample.png", "Wrist Extension", "15", "1", "First stretch the right side", "Now stretch the left"}, 
+        {"sample.png", "Neck Flexion", "30", "0", "Slowly face downwards and hold it as low as you can"}, 
+        {"sample.png", "Neck Extension", "30", "0", "Look upwards and hold it as high as you can"}, 
+        {"sample.png", "Neck Roll", "45", "0", "Slowly rotate your head from side to side"},
+        {"sample.png", "Shoulder Shrugs", "30", "0", "Slow movements and hold each position for 1 second"},
+        {"sample.png", "Hamstring Stretch", "20", "1", "Stretch your right leg first", "Now switch to the left leg"},
+        {"sample.png", "Calf Raises", "30", "0", "Slow and controlled and raises are the best"},
+        {"sample.png", "Back Lateral Extension", "15", "0", "Very slowly and carefully lean back and stretch"},
+        {"sample.png", "Go For a Walk", "90", "0", "Take a break away from screens"}
     };
 
     public Window() {
@@ -93,13 +94,14 @@ public class Window extends JFrame {
         midPanel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         midSouthPanel = new JPanel(new BorderLayout());  
-        midSouthPanel.setBorder(new EmptyBorder(0, (int) Math.floor(screenSize.getWidth()/4), 0, 0));
+        midSouthPanel.setBorder(new EmptyBorder(0, (int) Math.floor(screenSize.getWidth()/5), 0, 0));
         imagePanel = new JPanel(new BorderLayout());     
         midPanel.setBorder(new EmptyBorder(0, (int) (Math.floor(screenSize.getWidth()/5)), 0, 0));
 
         timerLabel = new JLabel("<html><h2>xx:xx</h2></html>");
         titleLabel = new JLabel("<html><h1>Excersize</h1></html>");
         descLabel = new JLabel("<html><h2>This side</h2></html>");
+        descLabel.setPreferredSize(new DimensionUIResource(350, 50));
         imageLabel = new JLabel();
 
         imagePanel.add(imageLabel, BorderLayout.WEST);
@@ -161,7 +163,7 @@ public class Window extends JFrame {
             if (excersizeData[Integer.parseInt(excersizes[i])][3].equals("0")) {
                 // If there is no side switching
 
-                descLabel.setText("<html><h2>Do it</h2></html>");
+                descLabel.setText("<html><h2>" + excersizeData[Integer.parseInt(excersizes[i], 10)][4] + "</h2></html>");
 
                 // Update time
                 secondsLeft = Integer.parseInt(excersizeData[Integer.parseInt(excersizes[i], 10)][2]);
@@ -176,13 +178,7 @@ public class Window extends JFrame {
                 // There is side switching
 
                 for (int sides = 0; sides < 2; sides++) {
-
-                    if (sides == 0) {
-                        descLabel.setText("<html><h2>Right Side First</h2></html>");
-                    } else {
-                        descLabel.setText("<html><h2>Now The Left Side</h2></html>");
-                    }
-
+                    descLabel.setText("<html><h2>" + excersizeData[Integer.parseInt(excersizes[i], 10)][4+sides] + "t</h2></html>");
                     secondsLeft = Integer.parseInt(excersizeData[Integer.parseInt(excersizes[i], 10)][2]);
                     while (true) {
                         if (secondsLeft == 0) {
