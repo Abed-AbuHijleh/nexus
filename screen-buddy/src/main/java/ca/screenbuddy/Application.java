@@ -1,3 +1,4 @@
+package ca.screenbuddy;
 
 // Imports
 import javax.swing.*;
@@ -7,9 +8,10 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.border.TitledBorder;
 
-import nested.Algo;
-import nested.swapFix;
-import nested.Settings;
+import ca.screenbuddy.nested.Algo;
+import ca.screenbuddy.nested.swapFix;
+import ca.screenbuddy.nested.Settings;
+import ca.screenbuddy.nested.Window;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -18,8 +20,6 @@ import java.util.*;
 
 import javax.imageio.ImageIO;
 import java.util.concurrent.TimeUnit;
-
-import nested.Window;
 
 public class Application extends JFrame implements ActionListener, ItemListener {
     // Serial Version UID
@@ -407,7 +407,7 @@ public class Application extends JFrame implements ActionListener, ItemListener 
         // Directory
 
         loggedInPanel = new JPanel(new BorderLayout());
-        loggedInPanel.setVisible(true);
+        loggedInPanel.setVisible(false);
         loggedInEastPanel = new JPanel();
         loggedInPanel.add(loggedInEastPanel, BorderLayout.EAST);
         loggedInEastPanel.setPreferredSize(new Dimension(keyPanelSizeWidth-110, keyPanelSizeHeight));
@@ -938,12 +938,13 @@ public class Application extends JFrame implements ActionListener, ItemListener 
         // Check bootup succeeded and call from there
 
     private void checkCredentials() {
-        final String[] credentials = appFileReader("db/userSave.txt");
+        final String[] credentials = appFileReader("/db/userSave.txt");
         try{
             if (credentials[0].equals("abed") && credentials[1].equals("password")) {
+                System.out.println("we in");
                 // Login Authorized
                 login.setVisible(false);
-                directory.setVisible(true);
+                loggedInPanel.setVisible(true);
                 loginErrorDisplay.setVisible(false);
             } else {
                 // Login Unauthorized
@@ -953,8 +954,10 @@ public class Application extends JFrame implements ActionListener, ItemListener 
         } catch (final ArrayIndexOutOfBoundsException err) {
             //Save file unpopulate
             login.setVisible(true);
+            loggedInPanel.setVisible(false);
         } catch (final NullPointerException err) {
             login.setVisible(true);
+            loggedInPanel.setVisible(false);
         }
     }
 
